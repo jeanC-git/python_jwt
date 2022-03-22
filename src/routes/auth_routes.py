@@ -8,7 +8,7 @@ base_uri = "auth"
 
 @auth.route('/generate-jwt', methods=['GET'])
 def generate_jwt():
-    user = User.query.filter_by(id=1).first()
+    user = User.query.first()
     token = generate_jwt_token(user_id=user.id, user_email=user.email)
 
     return {

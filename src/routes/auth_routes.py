@@ -6,7 +6,7 @@ auth = Blueprint("auth", __name__)
 base_uri = "auth"
 
 
-@auth.route('/generate-jwt', methods=['GET'])
+@auth.route(f'/{base_uri}/generate-jwt', methods=['GET'])
 def generate_jwt():
     user = User.query.first()
     token = generate_jwt_token(user_id=user.id, user_email=user.email)
@@ -16,9 +16,10 @@ def generate_jwt():
     }
 
 
-@auth.route('/me', methods=['GET'])
+@auth.route(f'/{base_uri}/me', methods=['GET'])
 @token_required
 def me(user):
+
     return {
         'user': user,
     }

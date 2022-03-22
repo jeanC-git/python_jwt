@@ -11,6 +11,5 @@ class User(db.Model):
     password = db.Column(db.String(50))
     role_id = db.Column(db.Integer)
 
-    _hidden_fields = [
-        "password",
-    ]
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

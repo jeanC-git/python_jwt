@@ -3,8 +3,9 @@ from config import DebugConfig
 
 import jwt
 from functools import wraps
-from flask import request, jsonify
+from flask import request, abort
 from datetime import datetime, timedelta
+from src.models.User import User
 
 
 def generate_jwt_token(user_id, user_email):
@@ -14,7 +15,7 @@ def generate_jwt_token(user_id, user_email):
             'email': user_email
         },
         'exp': datetime.utcnow() + timedelta(minutes=30)
-    # }, app.config['SECRET_KEY'])
+        # }, app.config['SECRET_KEY'])
     }, DebugConfig.SECRET_KEY)
 
     return token_generated
@@ -28,28 +29,23 @@ def token_required(f):
 
         if 'Authorization' in request.headers:
             token = request.headers['Authorization']
+            split = token.split()
+            token = split[1] if len(split) == 2 else None
 
         if not token:
             if uri_params.get('token'):
+                print(uri_params.get('token'))
                 token = uri_params.get('token')
 
-        split = token.split()
-        token = split[1] if len(split) == 2 else None
-
         if not token:
-            return jsonify({
-                'message': 'Token not found.',
-            })
+            abort(401, 'Token not found.')
 
         try:
             data = jwt.decode(token, DebugConfig.SECRET_KEY, algorithms=['HS256'])
-            # data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            # current_user = User.query.filter_by(public_id=data['public_id']).first()
-            user = data
+            current_user = User.query.filter_by(email=data['user']['email']).first().as_dict()
+            return f(current_user, *args, **kwargs)
 
         except:
-            return jsonify({'message': 'Invalid token.'})
-
-        return f(user, *args, **kwargs)
+            abort(401, 'Invalid token.')
 
     return decorator

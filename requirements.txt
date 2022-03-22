@@ -1,0 +1,6 @@
+Flask
+datetime
+mysqlclient
+uuid
+Flask-SQLAlchemy
+PyJWT
